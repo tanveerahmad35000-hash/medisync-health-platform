@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MediSync — Digital Healthcare & Appointment Booking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#2563eb; --primary-dark:#1d4ed8; --primary-soft:#e6efff;
+    --accent:#0d9488; --accent-soft:#dcfaf5;
+    --ink:#0f1b2d; --muted:#5c6c84; --line:#e2eaf4; --bg:#f5f9fd; --surface:#ffffff;
+    --warn:#b45309; --warn-soft:#fef3c7; --danger:#dc2626; --ok:#15803d; --ok-soft:#dcfce7;
+    --radius:18px; --radius-sm:12px;
+    --sh-sm:0 1px 2px rgba(15,27,45,.06), 0 2px 6px rgba(15,27,45,.04);
+    --sh-md:0 10px 28px -14px rgba(15,27,45,.25);
+    --sh-lg:0 30px 60px -30px rgba(15,27,45,.35);
+    --grad:linear-gradient(135deg,#2563eb,#0d9488);
+  }
+  [data-theme="dark"]{
+    --primary:#5b9bff; --primary-dark:#3b82f6; --primary-soft:#16233a;
+    --accent:#2dd4bf; --accent-soft:#0f2b2a;
+    --ink:#e8f0fb; --muted:#93a4bd; --line:#243350; --bg:#0a111f; --surface:#111b2e;
+    --warn-soft:#3a2c10; --ok-soft:#0f2a1c;
+    --sh-sm:0 1px 2px rgba(0,0,0,.4); --sh-md:0 10px 30px -16px rgba(0,0,0,.8); --sh-lg:0 30px 60px -30px rgba(0,0,0,.9);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; line-height:1.55;
+    transition:background .3s, color .3s;
+  }
+  h1,h2,h3,h4{margin:0; line-height:1.2; letter-spacing:-.02em; font-weight:700}
+  p{margin:0}
+  a{color:inherit; text-decoration:none}
+  button{font-family:inherit}
+  input,select,textarea{font-family:inherit}
+  .container{width:min(1180px,92vw); margin-inline:auto}
+  .muted{color:var(--muted)}
+  .center{text-align:center}
+  .hidden{display:none !important}
+
+  /* ---------- Buttons ---------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:13px;
+    font-weight:600;font-size:14.5px;border:1px solid transparent;cursor:pointer;transition:.18s ease;white-space:nowrap}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--grad);color:#fff;box-shadow:0 10px 22px -12px rgba(37,99,235,.9)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 16px 28px -14px rgba(37,99,235,1)}
+  .btn-ghost{background:var(--surface);border-color:var(--line);color:var(--ink);box-shadow:var(--sh-sm)}
+  .btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+  .btn-soft{background:var(--primary-soft);color:var(--primary)}
+  .btn-soft:hover{background:var(--primary);color:#fff}
+  .btn-danger{background:transparent;border-color:var(--line);color:var(--danger)}
+  .btn-danger:hover{background:#fee2e2;border-color:#fca5a5}
+  .btn-sm{padding:8px 13px;font-size:13px;border-radius:10px}
+  .btn-block{width:100%}
+  .btn[disabled]{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+
+  /* ---------- Nav ---------- */
+  header.nav{position:sticky;top:0;z-index:60;background:color-mix(in srgb, var(--surface) 82%, transparent);
+    backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .nav-inner{display:flex;align-items:center;gap:26px;height:70px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:19px;letter-spacing:-.03em}
+  .brand-mark{width:36px;height:36px;border-radius:11px;background:var(--grad);display:grid;place-items:center;
+    box-shadow:0 8px 18px -8px rgba(37,99,235,.9);flex:none}
+  .brand-mark svg{width:20px;height:20px}
+  .nav-links{display:flex;gap:4px;margin-left:6px}
+  .nav-links button{background:none;border:0;padding:9px 13px;border-radius:10px;font-size:14.5px;font-weight:500;
+    color:var(--muted);cursor:pointer;transition:.15s}
+  .nav-links button:hover{color:var(--ink);background:var(--primary-soft)}
+  .nav-links button.active{color:var(--primary);background:var(--primary-soft);font-weight:600}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);
+    display:grid;place-items:center;cursor:pointer;color:var(--ink);transition:.18s}
+  .icon-btn:hover{border-color:var(--primary);color:var(--primary)}
+  .icon-btn svg{width:18px;height:18px}
+  .hamburger{display:none}
+
+  /* ---------- Layout blocks ---------- */
+  section.pad{padding:74px 0}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:6px 13px;border-radius:99px}
+  .sec-head{max-width:660px;margin:auto auto 46px;text-align:center}
+  .sec-head h2{font-size:clamp(26px,3.4vw,40px);margin:16px 0 12px}
+  .sec-head p{color:var(--muted);font-size:16px}
+  .grid{display:grid;gap:20px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--sh-sm)}
+
+  /* ---------- Hero ---------- */
+  .hero{position:relative;overflow:hidden;padding:66px 0 76px}
+  .hero::before{content:'';position:absolute;inset:-30% 40% 40% -20%;
+    background:radial-gradient(circle at 30% 30%, rgba(37,99,235,.22), transparent 60%);filter:blur(10px);pointer-events:none}
+  .hero::after{content:'';position:absolute;inset:20% -25% -30% 55%;
+    background:radial-gradient(circle at 50% 50%, rgba(13,148,136,.2), transparent 62%);pointer-events:none}
+  .hero-inner{position:relative;display:grid;grid-template-columns:1.08fr .92fr;gap:52px;align-items:center}
+  .hero h1{font-size:clamp(34px,4.9vw,57px);margin:20px 0 18px;letter-spacing:-.035em}
+  .hero h1 .hl{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p.lead{font-size:17.5px;color:var(--muted);max-width:540px}
+  .hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0 26px}
+  .trust{display:flex;gap:26px;flex-wrap:wrap;padding-top:22px;border-top:1px solid var(--line)}
+  .trust div b{display:block;font-size:22px;font-weight:800;letter-spacing:-.03em}
+  .trust div span{font-size:13px;color:var(--muted)}
+
+  .tool-card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:var(--sh-lg)}
+  .tabbar{display:flex;gap:6px;background:var(--bg);padding:5px;border-radius:13px;margin-bottom:18px}
+  .tabbar button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font-size:13.5px;font-weight:600;
+    color:var(--muted);cursor:pointer;transition:.16s}
+  .tabbar button.on{background:var(--surface);color:var(--primary);box-shadow:var(--sh-sm)}
+  .field label{display:block;font-size:12.8px;font-weight:600;margin-bottom:6px;color:var(--muted)}
+  .input,select.input,textarea.input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+    background:var(--bg);color:var(--ink);font-size:14.5px;outline:none;transition:.16s}
+  .input:focus{border-color:var(--primary);background:var(--surface);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 15%, transparent)}
+  textarea.input{resize:vertical;min-height:78px}
+  .chip-row{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:var(--surface);padding:7px 13px;border-radius:99px;font-size:13px;
+    font-weight:500;cursor:pointer;color:var(--muted);transition:.16s}
+  .chip:hover{border-color:var(--primary);color:var(--primary)}
+  .chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
+
+  /* ---------- Feature cards ---------- */
+  .feature{padding:24px;transition:.2s}
+  .feature:hover{transform:translateY(-4px);box-shadow:var(--sh-md);border-color:color-mix(in srgb,var(--primary) 40%, var(--line))}
+  .f-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--primary-soft);
+    color:var(--primary);font-size:22px;margin-bottom:16px}
+  .feature h3{font-size:17px;margin-bottom:8px}
+  .feature p{font-size:14.2px;color:var(--muted)}
+
+  /* ---------- Specialty tiles ---------- */
+  .spec-tile{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:20px;cursor:pointer;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);transition:.2s;text-align:left}
+  .spec-tile:hover{transform:translateY(-4px);box-shadow:var(--sh-md);border-color:var(--primary)}
+  .spec-tile .em{font-size:26px}
+  .spec-tile b{font-size:15px}
+  .spec-tile span{font-size:12.5px;color:var(--muted)}
+
+  /* ---------- Steps ---------- */
+  .step-card{padding:26px;position:relative}
+  .step-num{width:38px;height:38px;border-radius:12px;background:var(--grad);color:#fff;display:grid;place-items:center;
+    font-weight:800;font-size:15px;margin-bottom:16px}
+  .step-card h3{font-size:16.5px;margin-bottom:8px}
+  .step-card p{font-size:14px;color:var(--muted)}
+
+  /* ---------- Doctor cards ---------- */
+  .doc-card{padding:20px;display:flex;flex-direction:column;gap:14px;transition:.2s}
+  .doc-card:hover{box-shadow:var(--sh-md);transform:translateY(-3px)}
+  .doc-top{display:flex;gap:14px}
+  .avatar{width:62px;height:62px;border-radius:17px;flex:none;display:grid;place-items:center;color:#fff;
+    font-weight:800;font-size:20px;letter-spacing:-.02em}
+  .doc-name{font-size:16.5px;font-weight:700;letter-spacing:-.02em}
+  .doc-spec{font-size:13.2px;color:var(--primary);font-weight:600}
+  .doc-meta{font-size:12.8px;color:var(--muted);margin-top:3px}
+  .doc-body{font-size:13.4px;color:var(--muted);display:flex;flex-direction:column;gap:7px}
+  .doc-row{display:flex;justify-content:space-between;gap:10px}
+  .stars{color:#f59e0b;font-weight:700;font-size:13.5px}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:11.8px;font-weight:600;padding:4px 9px;border-radius:99px;
+    background:var(--ok-soft);color:var(--ok)}
+  .badge.blue{background:var(--primary-soft);color:var(--primary)}
+  .badge.warn{background:var(--warn-soft);color:var(--warn)}
+  .doc-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px;border-top:1px dashed var(--line);margin-top:auto}
+  .fee b{font-size:17px;font-weight:800}
+  .fee span{font-size:12.5px;color:var(--muted)}
+  .tagline{font-size:12.4px;color:var(--muted)}
+
+  /* ---------- Filters ---------- */
+  .docs-layout{display:grid;grid-template-columns:278px 1fr;gap:26px;align-items:start}
+  .filters{padding:22px;position:sticky;top:90px}
+  .filters h4{font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:11px}
+  .fgroup{padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+  .fgroup:last-child{border:0;margin:0;padding:0}
+  .radio-row{display:flex;align-items:center;gap:9px;font-size:14px;padding:6px 0;cursor:pointer}
+  input[type=range]{width:100%;accent-color:var(--primary)}
+  .results-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+
+  /* ---------- Dashboard ---------- */
+  .stat{padding:20px;display:flex;gap:15px;align-items:center}
+  .stat-ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:21px;flex:none}
+  .stat b{display:block;font-size:25px;font-weight:800;letter-spacing:-.03em;line-height:1.15}
+  .stat span{font-size:13px;color:var(--muted)}
+  .panel{padding:24px}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+  .panel-head h3{font-size:17.5px}
+  .appt{padding:18px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;border-radius:var(--radius);
+    border:1px solid var(--line);background:var(--surface)}
+  .appt-date{width:64px;flex:none;text-align:center;border-radius:14px;padding:9px 0;background:var(--primary-soft);color:var(--primary)}
+  .appt-date b{display:block;font-size:21px;font-weight:800;line-height:1}
+  .appt-date span{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .appt-info{flex:1;min-width:190px}
+  .appt-info b{font-size:15.5px}
+  .appt-info div{font-size:13.2px;color:var(--muted)}
+  .empty{padding:44px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--radius)}
+  table{width:100%;border-collapse:collapse;font-size:13.8px}
+  th{text-align:left;font-size:11.8px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+    padding:10px 12px;border-bottom:1px solid var(--line)}
+  td{padding:13px 12px;border-bottom:1px solid var(--line)}
+  tr:last-child td{border-bottom:0}
+  .pill{font-size:11.6px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--ok-soft);color:var(--ok)}
+  .pill.grey{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+  .vitals-tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .vital-stat{display:flex;gap:8px;flex-direction:column;padding:12px 14px;border-radius:13px;background:var(--bg);border:1px solid var(--line)}
+  .vital-stat span{font-size:11.6px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .vital-stat b{font-size:17px;font-weight:800}
+
+  /* ---------- Modal ---------- */
+  .backdrop{position:fixed;inset:0;z-index:120;background:rgba(9,16,29,.55);backdrop-filter:blur(4px);
+    display:grid;place-items:center;padding:20px;animation:fade .2s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+  .modal{background:var(--surface);border-radius:22px;width:min(760px,100%);max-height:90vh;overflow:auto;
+    box-shadow:var(--sh-lg);border:1px solid var(--line);animation:pop .24s ease;position:relative}
+  .modal-x{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:11px;border:1px solid var(--line);
+    background:var(--surface);cursor:pointer;color:var(--muted);font-size:16px;z-index:2}
+  .modal-x:hover{color:var(--danger);border-color:var(--danger)}
+  .modal-pad{padding:28px}
+  .modal-title{font-size:21px;margin-bottom:4px;padding-right:40px}
+  .modal-sub{font-size:13.8px;color:var(--muted);margin-bottom:24px}
+
+  .wiz-steps{display:flex;gap:8px;margin-bottom:26px}
+  .wiz-steps .ws{flex:1;height:6px;border-radius:99px;background:var(--bg);overflow:hidden}
+  .wiz-steps .ws.on{background:var(--grad)}
+  .wiz-labels{display:flex;justify-content:space-between;font-size:11.6px;color:var(--muted);margin-bottom:22px;font-weight:600}
+  .wiz-labels span.on{color:var(--primary)}
+  .date-strip{display:flex;gap:9px;overflow-x:auto;padding-bottom:10px;scrollbar-width:thin}
+  .date-pill{flex:none;min-width:74px;padding:11px 8px;border-radius:14px;border:1px solid var(--line);background:var(--surface);
+    cursor:pointer;text-align:center;transition:.16s}
+  .date-pill:hover{border-color:var(--primary)}
+  .date-pill.on{background:var(--primary);border-color:var(--primary);color:#fff}
+  .date-pill b{display:block;font-size:15px;font-weight:700}
+  .date-pill span{font-size:11.4px;opacity:.8}
+  .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:9px}
+  .slot{padding:10px 6px;border-radius:11px;border:1px solid var(--line);background:var(--surface);font-size:13.2px;
+    font-weight:600;cursor:pointer;transition:.16s;color:var(--ink)}
+  .slot:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+  .slot.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .slot:disabled{opacity:.35;cursor:not-allowed;text-decoration:line-through}
+  .seg{display:flex;gap:6px;background:var(--bg);padding:5px;border-radius:13px}
+  .seg button{flex:1;border:0;background:none;padding:10px;border-radius:9px;font-weight:600;font-size:13.8px;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--surface);color:var(--primary);box-shadow:var(--sh-sm)}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-grid .full{grid-column:1/-1}
+  .err{font-size:12.2px;color:var(--danger);margin-top:5px;font-weight:600}
+  .summary{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:20px}
+  .summary-row{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}
+  .summary-row:last-child{border:0;padding-bottom:0}
+  .summary-row span{color:var(--muted)}
+  .success{text-align:center;padding:14px 0 4px}
+  .tick{width:76px;height:76px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;
+    margin:0 auto 20px;font-size:36px;animation:pop .4s ease}
+  .book-id{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;font-size:15px;
+    background:var(--primary-soft);color:var(--primary);padding:8px 16px;border-radius:11px;margin:12px 0 4px;letter-spacing:.05em}
+
+  /* ---------- Toast ---------- */
+  .toasts{position:fixed;right:20px;bottom:20px;z-index:200;display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+  .toast{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--primary);border-radius:14px;
+    padding:14px 18px;box-shadow:var(--sh-md);font-size:14px;min-width:250px;max-width:340px;animation:pop .25s ease}
+  .toast b{display:block;font-size:13.6px;margin-bottom:2px}
+  .toast span{color:var(--muted);font-size:13px}
+  .toast.ok{border-left-color:var(--ok)}
+  .toast.warn{border-left-color:var(--warn)}
+
+  /* ---------- Doctor-aside / queue ---------- */
+  .queue-item{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .queue-item:last-child{border:0}
+  .queue-item b{font-size:14.2px}
+  .queue-item div span{font-size:12.4px;color:var(--muted)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);flex:none}
+
+  /* ---------- CTA + footer ---------- */
+  .cta-band{background:var(--grad);border-radius:26px;padding:52px;color:#fff;display:flex;align-items:center;
+    gap:34px;flex-wrap:wrap;box-shadow:var(--sh-lg)}
+  .cta-band h2{font-size:clamp(24px,3vw,34px);margin-bottom:10px}
+  .cta-band p{opacity:.92;font-size:16px;max-width:520px}
+  .cta-band .btn{background:#fff;color:var(--primary-dark);box-shadow:none}
+  footer{border-top:1px solid var(--line);background:var(--surface);padding:52px 0 30px;margin-top:76px}
+  .foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:30px}
+  .foot-grid h5{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 14px}
+  .foot-links{display:flex;flex-direction:column;gap:10px;font-size:14px}
+  .foot-links button{background:none;border:0;padding:0;text-align:left;color:var(--muted);cursor:pointer;font-size:14px}
+  .foot-links button:hover{color:var(--primary)}
+  .foot-bottom{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:26px;margin-top:30px;
+    border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+
+  /* ---------- Responsive ---------- */
+  @media(max-width:1020px){
+    .hero-inner{grid-template-columns:1fr;gap:38px}
+    .docs-layout{grid-template-columns:1fr}
+    .filters{position:static}
+    .g4{grid-template-columns:repeat(2,1fr)}
+    .g3{grid-template-columns:repeat(2,1fr)}
+    .foot-grid{grid-template-columns:1fr 1fr}
+  }
+  @media(max-width:760px){
+    .nav-links{display:none}
+    .nav-links.open{display:flex;position:absolute;top:70px;left:0;right:0;flex-direction:column;background:var(--surface);
+      border-bottom:1px solid var(--line);padding:10px 4vw 16px;gap:2px;box-shadow:var(--sh-md)}
+    .hamburger{display:grid}
+    .g2,.g3,.g4{grid-template-columns:1fr}
+    section.pad{padding:52px 0}
+    .form-grid{grid-template-columns:1fr}
+    .cta-band{padding:34px}
+    .modal-pad{padding:22px}
+    .nav-right .btn-desk{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <div class="brand" data-action="nav" data-page="home" style="cursor:pointer">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+      </span>
+      MediSync
+    </div>
+    <nav class="nav-links" id="navLinks">
+      <button data-action="nav" data-page="home">Home</button>
+      <button data-action="nav" data-page="doctors">Find Doctors</button>
+      <button data-action="nav" data-page="dashboard">My Health</button>
+      <button data-action="nav" data-page="home" data-scroll="for-doctors">For Doctors</button>
+      <button data-action="nav" data-page="home" data-scroll="how">How It Works</button>
+    </nav>
+    <div class="nav-right">
+      <button class="icon-btn" data-action="toggle-theme" title="Toggle theme" aria-label="Toggle dark mode">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+        </svg>
+      </button>
+      <button class="btn btn-primary btn-desk" data-action="start-booking">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 11h18"/>
+        </svg>
+        Book Appointment
+      </button>
+      <button class="icon-btn hamburger" data-action="menu" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ================= HOME ================= -->
+  <section id="page-home" class="page">
+    <div class="hero">
+      <div class="container hero-inner">
+        <div>
+          <span class="eyebrow">● 24/7 Connected Care Network</span>
+          <h1>Healthcare that runs <span class="hl">on your schedule</span>, not the waiting room's.</h1>
+          <p class="lead">MediSync unifies appointment booking, secure video consults, digital prescriptions and
+            health records into one calm dashboard — so patients get seen faster and clinics run on time.</p>
+          <div class="hero-cta">
+            <button class="btn btn-primary" data-action="start-booking">
+              Book an appointment
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <button class="btn btn-ghost" data-action="nav" data-page="doctors">Browse 14 specialists</button>
+          </div>
+          <div class="trust">
+            <div><b>340k+</b><span>Appointments booked</span></div>
+            <div><b>1,250</b><span>Verified doctors</span></div>
+            <div><b>4.9/5</b><span>Patient rating</span></div>
+            <div><b>&lt; 4 min</b><span>Avg. wait in queue</span></div>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tabbar">
+            <button class="on" data-action="hero-tab" data-tab="symptom">Symptom checker</button>
+            <button data-action="hero-tab" data-tab="quick">Quick slot</button>
+          </div>
+          <div id="heroTabSymptom">
+            <div class="field" style="margin-bottom:14px">
+              <label for="symptomInput">Describe how you feel</label>
+              <input id="symptomInput" class="input" placeholder="e.g. chest pain and shortness of breath" />
+            </div>
+            <div class="chip-row" style="margin-bottom:16px">
+              <button class="chip" data-action="symptom-preset" data-s="headache">Headache</button>
+              <button class="chip" data-action="symptom-preset" data-s="skin rash">Skin rash</button>
+              <button class="chip" data-action="symptom-preset" data-s="knee pain">Knee pain</button>
+              <button class="chip" data-action="symptom-preset" data-s="fever and cough">Fever &amp; cough</button>
+            </div>
+            <button class="btn btn-primary btn-block" data-action="run-symptom">Find the right specialist</button>
+            <div id="symptomResult" class="hidden" style="margin-top:16px"></div>
+          </div>
+          <div id="heroTabQuick" class="hidden">
+            <p class="muted" style="font-size:14px;margin-bottom:16px">Choose a specialty and jump straight to available slots for the next 14 days.</p>
+            <div class="field" style="margin-bottom:14px">
+              <label for="quickSpec">Specialty</label>
+              <select id="quickSpec" class="input"></select>
+            </div>
+            <button class="btn btn-primary btn-block" data-action="quick-book">See available doctors</button>
+            <div style="margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)">
+              <div style="display:flex;align-items:center;gap:10px;font-size:13.4px;color:var(--muted)">
+                <span class="dot"></span> <b style="color:var(--ink);font-weight:600">Dr. Ananya Rao</b> is online now · 3 slots left
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="pad" style="padding-top:20px">
+      <div class="container">
+        <div class="sec-head">
+          <span class="eyebrow">Platform</span>
+          <h2>One system for the whole care journey</h2>
+          <p>Everything a modern clinic and a busy patient needs — built on a single, secure record.</p>
+        </div>
+        <div class="grid g3">
+          <div class="card feature"><div class="f-icon">🗓️</div><h3>Instant scheduling</h3><p>Real-time slot availability across every department, with smart reminders over SMS, email and WhatsApp.</p></div>
+          <div class="card feature"><div class="f-icon">🎥</div><h3>Secure video consults</h3><p>HIPAA-aligned, end-to-end encrypted telehealth rooms you can join from any browser — no downloads.</p></div>
+          <div class="card feature"><div class="f-icon">💊</div><h3>Digital prescriptions</h3><p>Doctors issue e-prescriptions that sync to the patient's record and reach the pharmacy instantly.</p></div>
+          <div class="card feature"><div class="f-icon">📁</div><h3>Unified health records</h3><p>Lab reports, scans and history in one timeline. Share a secure link with any doctor in seconds.</p></div>
+          <div class="card feature"><div class="f-icon">📈</div><h3>Vitals &amp; remote monitoring</h3><p>Track heart rate, blood pressure, SpO₂ and activity. Abnormal trends alert the care team automatically.</p></div>
+          <div class="card feature"><div class="f-icon">🏥</div><h3>Clinic operations suite</h3><p>Live queue management, no-show prediction, billing and multi-branch analytics for administrators.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pad" style="padding-top:0">
+      <div class="container">
+        <div class="sec-head">
+          <span class="eyebrow">Departments</span>
+          <h2>Care across 11 specialties</h2>
+          <p>Pick a department to see verified specialists, consultation fees and next available slots.</p>
+        </div>
+        <div class="grid g4" id="homeSpecialties"></div>
+      </div>
+    </section>
+
+    <section class="pad" id="how" style="padding-top:0">
+      <div class="container">
+        <div class="sec-head">
+          <span class="eyebrow">How it works</span>
+          <h2>Booked in under two minutes</h2>
+          <p>No phone calls, no hold music. Confirm a consultation in four quick steps.</p>
+        </div>
+        <div class="grid g4">
+          <div class="card step-card"><div class="step-num">1</div><h3>Search or symptom-check</h3><p>Filter by specialty, language, fee or availability — or let the symptom checker point you to the right expert.</p></div>
+          <div class="card step-card"><div class="step-num">2</div><h3>Pick a slot</h3><p>Live availability for the next 14 days, in-clinic or video. Slots lock the moment you select them.</p></div>
+          <div class="card step-card"><div class="step-num">3</div><h3>Confirm &amp; pay</h3><p>Add patient details, review the summary and get instant confirmation with a booking ID.</p></div>
+          <div class="card step-card"><div class="step-num">4</div><h3>Consult &amp; follow up</h3><p>Join the video room or walk in. Prescriptions, notes and reports land in your health record.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pad" style="padding-top:0">
+      <div class="container">
+        <div class="results-head">
+          <div>
+            <span class="eyebrow">Top rated</span>
+            <h2 style="font-size:clamp(22px,2.6vw,30px);margin-top:14px">Meet a few of our specialists</h2>
+          </div>
+          <button class="btn btn-ghost" data-action="nav" data-page="doctors">View all doctors</button>
+        </div>
+        <div class="grid g3" id="featuredDoctors"></div>
+      </div>
+    </section>
+
+    <section class="pad" id="for-doctors" style="padding-top:0">
+      <div class="container">
+        <div class="grid g2" style="gap:34px;align-items:center">
+          <div>
+            <span class="eyebrow">For clinicians &amp; clinics</span>
+            <h2 style="font-size:clamp(24px,3vw,36px);margin:16px 0 14px">Run your practice on autopilot</h2>
+            <p class="muted" style="font-size:16px;margin-bottom:22px">MediSync gives your front desk superpowers: automated slot filling, digital intake forms,
+              teleconsult rooms, e-prescribing and revenue dashboards — all synced to the patient's lifetime record.</p>
+            <div class="grid" style="gap:14px">
+              <div style="display:flex;gap:12px;align-items:flex-start"><span style="color:var(--accent);font-weight:800">✓</span><div><b>Reduce no-shows by 38%</b><div class="muted" style="font-size:14px">Automated multi-channel reminders and one-tap rescheduling.</div></div></div>
+              <div style="display:flex;gap:12px;align-items:flex-start"><span style="color:var(--accent);font-weight:800">✓</span><div><b>Cut admin work in half</b><div class="muted" style="font-size:14px">Digital intake, e-prescriptions and instant billing.</div></div></div>
+              <div style="display:flex;gap:12px;align-items:flex-start"><span style="color:var(--accent);font-weight:800">✓</span><div><b>See every branch at a glance</b><div class="muted" style="font-size:14px">Occupancy, revenue and patient satisfaction in one view.</div></div></div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:26px" data-action="toast-demo" data-title="Demo requested" data-msg="Our clinical onboarding team will reach out within one business day.">Request a clinic demo</button>
+          </div>
+          <div class="card panel">
+            <div class="panel-head">
+              <h3>Today's queue · Dr. Ananya Rao</h3>
+              <span class="badge">Live</span>
+            </div>
+            <div class="queue-item"><span class="dot"></span><div><b>Ravi Sharma</b><div><span>09:30 · Follow-up · In-clinic</span></div></div><span class="pill" style="margin-left:auto">Checked in</span></div>
+            <div class="queue-item"><span class="dot"></span><div><b>Neha Kapoor</b><div><span>09:50 · New consult · Video</span></div></div><span class="pill" style="margin-left:auto">Waiting</span></div>
+            <div class="queue-item"><span class="dot" style="background:var(--warn)"></span><div><b>Imran Qureshi</b><div><span>10:10 · ECG review</span></div></div><span class="pill grey" style="margin-left:auto">Not arrived</span></div>
+            <div class="queue-item"><span class="dot" style="background:var(--muted)"></span><div><b>Sara Fernandes</b><div><span>10:30 · Annual heart check</span></div></div><span class="pill grey" style="margin-left:auto">Scheduled</span></div>
+            <div style="display:flex;justify-content:space-between;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);font-size:13.6px">
+              <span class="muted">Avg. consult time</span><b>17 min</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:13.6px">
+              <span class="muted">Slot utilisation</span><b>92%</b>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pad" style="padding-top:0">
+      <div class="container">
+        <div class="sec-head">
+          <span class="eyebrow">Testimonials</span>
+          <h2>Trusted by patients and clinics</h2>
+        </div>
+        <div class="grid g3">
+          <div class="card feature"><div class="stars">★★★★★</div><p style="margin:12px 0 16px;color:var(--ink);font-size:14.6px">"I booked a cardiology consult at 11pm and was talking to a doctor the next morning. The prescription and ECG report were already in my records."</p><b style="font-size:14px">Priya S.</b><div class="tagline">Patient · Bengaluru</div></div>
+          <div class="card feature"><div class="stars">★★★★★</div><p style="margin:12px 0 16px;color:var(--ink);font-size:14.6px">"Our no-shows dropped by a third in two months. The queue view alone changed how our front desk works."</p><b style="font-size:14px">Dr. Vikram Mehta</b><div class="tagline">Orthopaedic Surgeon · Pune</div></div>
+          <div class="card feature"><div class="stars">★★★★★</div><p style="margin:12px 0 16px;color:var(--ink);font-size:14.6px">"Managing my mother's diabetes is finally organised — vitals, appointments and reports in one place we both can see."</p><b style="font-size:14px">Arjun N.</b><div class="tagline">Caregiver · Hyderabad</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding-bottom:20px">
+      <div class="container">
+        <div class="cta-band">
+          <div style="flex:1;min-width:280px">
+            <h2>Your next appointment is two minutes away.</h2>
+            <p>Join 340,000 patients who manage their whole health journey on MediSync — free for patients, forever.</p>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn" data-action="start-booking">Book an appointment</button>
+            <button class="btn" style="background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.4)" data-action="nav" data-page="dashboard">Open my health</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ================= DOCTORS ================= -->
+  <section id="page-doctors" class="page hidden pad">
+    <div class="container">
+      <div style="margin-bottom:32px">
+        <span class="eyebrow">Directory</span>
+        <h2 style="font-size:clamp(26px,3.4vw,38px);margin:16px 0 10px">Find your specialist</h2>
+        <p class="muted" style="font-size:16px;max-width:620px">Search 14 verified doctors across 11 departments. Filter by consultation mode, fee and availability, then book a slot instantly.</p>
+      </div>
+
+      <div class="docs-layout">
+        <aside class="card filters">
+          <div class="fgroup">
+            <h4>Search</h4>
+            <input id="fSearch" class="input" placeholder="Doctor, specialty, hospital" />
+          </div>
+          <div class="fgroup">
+            <h4>Specialty</h4>
+            <select id="fSpec" class="input"></select>
+          </div>
+          <div class="fgroup">
+            <h4>Consultation mode</h4>
+            <label class="radio-row"><input type="radio" name="mode" value="all" checked> Any</label>
+            <label class="radio-row"><input type="radio" name="mode" value="clinic"> In-clinic</label>
+            <label class="radio-row"><input type="radio" name="mode" value="video"> Video consult</label>
+          </div>
+          <div class="fgroup">
+            <h4>Max fee · <span id="feeOut" style="color:var(--primary)">₹2000</span></h4>
+            <input id="fFee" type="range" min="300" max="2000" step="100" value="2000" />
+          </div>
+          <div class="fgroup">
+            <h4>Sort by</h4>
+            <select id="fSort" class="input">
+              <option value="rating">Highest rated</option>
+              <option value="fee">Lowest fee</option>
+              <option value="exp">Most experienced</option>
+              <option value="soon">Earliest available</option>
+            </select>
+          </div>
+          <button class="btn btn-ghost btn-block btn-sm" data-action="reset-filters">Reset filters</button>
+        </aside>
+
+        <div>
+          <div class="results-head">
+            <b id="resultsCount" style="font-size:15px">14 doctors available</b>
+            <span class="muted" style="font-size:13.4px">Showing slots for the next 14 days</span>
+          </div>
+          <div class="grid" id="doctorGrid" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DASHBOARD ================= -->
+  <section id="page-dashboard" class="page hidden pad">
+    <div class="container">
+      <div class="results-head" style="margin-bottom:26px">
+        <div>
+          <span class="eyebrow">Patient portal</span>
+          <h2 style="font-size:clamp(24px,3vw,34px);margin-top:14px">Good afternoon, Aditi 👋</h2>
+          <p class="muted" style="font-size:15px;margin-top:6px">Here's your care snapshot. Everything syncs with your doctor in real time.</p>
+        </div>
+        <button class="btn btn-primary" data-action="start-booking">+ New appointment</button>
+      </div>
+
+      <div class="grid g4" style="margin-bottom:26px" id="dashStats"></div>
+
+      <div class="grid" style="grid-template-columns:1.35fr 1fr;gap:22px;margin-bottom:26px" id="dashMain">
+        <div class="card panel">
+          <div class="panel-head">
+            <h3>Upcoming appointments</h3>
+            <span class="badge blue" id="upcomingCount">0 scheduled</span>
+          </div>
+          <div id="upcomingList" style="display:flex;flex-direction:column;gap:14px"></div>
+        </div>
+        <div class="card panel">
+          <div class="panel-head"><h3>Health vitals</h3></div>
+          <div class="vitals-tabs" style="margin-bottom:16px" id="vitalTabs"></div>
+          <div id="vitalChart"></div>
+          <div class="grid g3" style="gap:10px;margin-top:18px" id="vitalSummary"></div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:1.35fr 1fr;gap:22px">
+        <div class="card panel">
+          <div class="panel-head">
+            <h3>Active prescriptions</h3>
+            <span class="muted" style="font-size:13px">3 medications</span>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>Medicine</th><th>Prescribed by</th><th>Dosage</th><th>Status</th></tr></thead>
+              <tbody id="rxBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card panel">
+          <div class="panel-head"><h3>Recent reports</h3></div>
+          <div id="reportsList" style="display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <div class="brand" style="margin-bottom:14px">
+          <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          MediSync
+        </div>
+        <p class="muted" style="font-size:14px;max-width:300px">The digital healthcare management and appointment platform for modern clinics and connected patients.</p>
+        <div class="muted" style="font-size:13px;margin-top:16px">Emergency? Call <b style="color:var(--ink)">108</b> immediately.</div>
+      </div>
+      <div>
+        <h5>Patients</h5>
+        <div class="foot-links">
+          <button data-action="nav" data-page="doctors">Find a doctor</button>
+          <button data-action="start-booking">Book appointment</button>
+          <button data-action="nav" data-page="dashboard">My health record</button>
+          <button data-action="toast-demo" data-title="Coming soon" data-msg="Video consult rooms open from your upcoming appointment card.">Video consults</button>
+        </div>
+      </div>
+      <div>
+        <h5>Providers</h5>
+        <div class="foot-links">
+          <button data-action="nav" data-page="home" data-scroll="for-doctors">Clinic suite</button>
+          <button data-action="toast-demo" data-title="Partnerships" data-msg="Email partners@medisync.health to onboard your hospital network.">Hospital networks</button>
+          <button data-action="toast-demo" data-title="Integrations" data-msg="HL7, FHIR and lab integrations available on the enterprise plan.">Integrations</button>
+          <button data-action="toast-demo" data-title="Pricing" data-msg="Free for patients. Clinic plans start at ₹4,999/month.">Pricing</button>
+        </div>
+      </div>
+      <div>
+        <h5>Company</h5>
+        <div class="foot-links">
+          <button data-action="toast-demo" data-title="About MediSync" data-msg="We're a team of clinicians and engineers building calm healthcare software.">About us</button>
+          <button data-action="toast-demo" data-title="Security" data-msg="AES-256 encryption at rest, TLS 1.3 in transit, and role-based access controls.">Security &amp; privacy</button>
+          <button data-action="toast-demo" data-title="Support" data-msg="Our care desk is available 24/7 at support@medisync.health.">Contact support</button>
+          <button data-action="toast-demo" data-title="Careers" data-msg="We're hiring engineers and clinical advisors across India.">Careers</button>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 MediSync Health Technologies. Demo experience — not for real medical use.</span>
+      <span>Privacy · Terms · GDPR &amp; DPDP compliant</span>
+    </div>
+  </div>
+</footer>
+
+<div id="modalRoot"></div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* ============================================================
+   MediSync — client-side app (in-memory state only)
+   ============================================================ */
+
+const SPECIALTIES = [
+  { id:'general',       name:'General Physician', em:'🩺', blurb:'Everyday illness & checkups' },
+  { id:'cardiology',    name:'Cardiology',        em:'❤️', blurb:'Heart & blood vessels' },
+  { id:'dermatology',   name:'Dermatology',       em:'✨', blurb:'Skin, hair & nails' },
+  { id:'neurology',     name:'Neurology',         em:'🧠', blurb:'Brain, nerves & migraine' },
+  { id:'orthopedics',   name:'Orthopedics',       em:'🦴', blurb:'Bones, joints & spine' },
+  { id:'pediatrics',    name:'Pediatrics',        em:'🧒', blurb:'Infants & children' },
+  { id:'gynecology',    name:'Gynecology',        em:'🌸', blurb:"Women's health" },
+  { id:'ent',           name:'ENT',               em:'👂', blurb:'Ear, nose & throat' },
+  { id:'ophthalmology', name:'Ophthalmology',     em:'👁️', blurb:'Eyes & vision care' },
+  { id:'psychiatry',    name:'Mental Health',     em:'🧘', blurb:'Anxiety, mood & sleep' },
+  { id:'endocrinology', name:'Endocrinology',     em:'🧪', blurb:'Diabetes & thyroid' },
+  { id:'dentistry',     name:'Dentistry',         em:'🦷', blurb:'Teeth & oral health' }
+];
+
+const DOCTORS = [
+  { id:'d1',  name:'Dr. Ananya Rao',      spec:'cardiology',    exp:14, rating:4.9, reviews:1284, fee:1200, langs:['English','Hindi','Kannada'], modes:['clinic','video'], hospital:'Apollo Heart Institute, Bengaluru',
+    quals:'MBBS, MD (Cardiology), DM', times:['09:00','09:30','10:00','10:30','11:00','12:00','12:30','17:00','17:30','18:00','18:30'],
+    bio:'Interventional cardiologist focused on preventive heart care, arrhythmia management and post-operative rehabilitation.' },
+  { id:'d2',  name:'Dr. Vikram Mehta',    spec:'orthopedics',   exp:18, rating:4.8, reviews:962,  fee:950,  langs:['English','Hindi','Marathi'], modes:['clinic'], hospital:'Sahyadri Ortho Centre, Pune',
+    quals:'MBBS, MS (Ortho), Fellowship in Joint Replacement', times:['10:00','10:30','11:00','11:30','12:00','16:00','16:30','17:00','17:30'],
+    bio:'Joint replacement and sports injury specialist, treating knee, shoulder and spine conditions with minimally invasive techniques.' },
+  { id:'d3',  name:'Dr. Priya Nair',      spec:'dermatology',   exp:11, rating:4.9, reviews:1740, fee:850,  langs:['English','Malayalam','Hindi'], modes:['clinic','video'], hospital:'GlowSkin Clinic, Kochi',
+    quals:'MBBS, MD (Dermatology)', times:['09:30','10:00','10:30','11:00','15:30','16:00','16:30','17:00','19:00'],
+    bio:'Clinical dermatologist covering acne, pigmentation, hair loss and chronic skin conditions including psoriasis and eczema.' },
+  { id:'d4',  name:'Dr. Rohan Gupta',     spec:'general',       exp:9,  rating:4.7, reviews:2110, fee:500,  langs:['English','Hindi','Punjabi'], modes:['clinic','video'], hospital:'MediSync Multispecialty, Delhi',
+    quals:'MBBS, MD (Internal Medicine)', times:['08:30','09:00','09:30','10:00','11:30','12:00','18:00','18:30','19:00','19:30'],
+    bio:'Internal medicine physician handling fever, infections, diabetes, hypertension and routine preventive health screening.' },
+  { id:'d5',  name:'Dr. Sneha Iyer',      spec:'pediatrics',    exp:12, rating:4.9, reviews:1398, fee:700,  langs:['English','Tamil','Hindi'], modes:['clinic','video'], hospital:'Little Steps Childrens Clinic, Chennai',
+    quals:'MBBS, DCH, DNB (Pediatrics)', times:['09:00','09:30','10:00','10:30','11:00','16:30','17:00','17:30','18:00'],
+    bio:'Paediatrician covering newborn care, vaccination schedules, growth monitoring and childhood allergies.' },
+  { id:'d6',  name:'Dr. Arjun Kapoor',    spec:'neurology',     exp:16, rating:4.8, reviews:874,  fee:1500, langs:['English','Hindi'], modes:['clinic','video'], hospital:'NeuroCare Institute, Mumbai',
+    quals:'MBBS, MD, DM (Neurology)', times:['10:30','11:00','11:30','12:00','12:30','16:00','16:30','17:00'],
+    bio:'Neurologist specialising in migraine, epilepsy, stroke rehabilitation and movement disorders such as Parkinson\u2019s.' },
+  { id:'d7',  name:'Dr. Meera Joshi',     spec:'gynecology',    exp:15, rating:4.9, reviews:1520, fee:1000, langs:['English','Hindi','Gujarati'], modes:['clinic','video'], hospital:'Aarogya Women\'s Hospital, Ahmedabad',
+    quals:'MBBS, MS (OBG), Fellowship in Infertility', times:['09:00','09:30','10:00','11:00','11:30','17:00','17:30','18:00'],
+    bio:'Obstetrician and gynaecologist supporting pregnancy care, PCOS, fertility treatment and menopause management.' },
+  { id:'d8',  name:'Dr. Karthik Reddy',   spec:'ent',           exp:10, rating:4.6, reviews:645,  fee:750,  langs:['English','Telugu','Hindi'], modes:['clinic'], hospital:'Swara ENT Care, Hyderabad',
+    quals:'MBBS, MS (ENT)', times:['10:00','10:30','11:00','11:30','12:00','15:30','16:00','16:30'],
+    bio:'ENT surgeon treating sinusitis, tonsillitis, hearing loss, vertigo and paediatric ear infections.' },
+  { id:'d9',  name:'Dr. Nisha Verma',     spec:'ophthalmology', exp:13, rating:4.8, reviews:731,  fee:800,  langs:['English','Hindi','Bengali'], modes:['clinic','video'], hospital:'Drishti Eye Centre, Kolkata',
+    quals:'MBBS, MS (Ophthalmology)', times:['09:30','10:00','10:30','11:00','16:00','16:30','17:00','17:30'],
+    bio:'Ophthalmologist focused on cataract surgery, diabetic retinopathy, glaucoma screening and paediatric vision.' },
+  { id:'d10', name:'Dr. Sameer Khan',     spec:'psychiatry',    exp:12, rating:4.9, reviews:1105, fee:1400, langs:['English','Hindi','Urdu'], modes:['video','clinic'], hospital:'MindWell Clinic, Lucknow',
+    quals:'MBBS, MD (Psychiatry)', times:['11:00','11:30','12:00','12:30','17:00','17:30','18:00','18:30','19:00'],
+    bio:'Psychiatrist offering confidential therapy support for anxiety, depression, burnout, ADHD and sleep disorders.' },
+  { id:'d11', name:'Dr. Deepa Menon',     spec:'endocrinology', exp:17, rating:4.8, reviews:998,  fee:1300, langs:['English','Malayalam','Hindi'], modes:['clinic','video'], hospital:'Metabolic Health Centre, Bengaluru',
+    quals:'MBBS, MD, DM (Endocrinology)', times:['09:00','09:30','10:00','10:30','11:00','15:00','15:30','16:00'],
+    bio:'Endocrinologist managing type 1 and type 2 diabetes, thyroid disorders, PCOS and hormonal imbalance.' },
+  { id:'d12', name:'Dr. Rahul Bose',      spec:'dentistry',     exp:8,  rating:4.7, reviews:1188, fee:650,  langs:['English','Bengali','Hindi'], modes:['clinic'], hospital:'SmileWorks Dental, Kolkata',
+    quals:'BDS, MDS (Prosthodontics)', times:['10:00','10:30','11:00','11:30','12:00','16:00','16:30','17:00','17:30','18:00'],
+    bio:'Dental surgeon for root canals, implants, cosmetic dentistry and paediatric dental care.' },
+  { id:'d13', name:'Dr. Farah Sheikh',    spec:'general',       exp:6,  rating:4.6, reviews:512,  fee:400,  langs:['English','Hindi','Marathi'], modes:['video','clinic'], hospital:'MediSync Multispecialty, Delhi',
+    quals:'MBBS, DNB (Family Medicine)', times:['08:00','08:30','09:00','09:30','13:00','13:30','18:00','18:30','19:00'],
+    bio:'Family medicine doctor for acute illness, travel advice, vaccinations and chronic disease follow-ups.' },
+  { id:'d14', name:'Dr. Aditya Kulkarni', spec:'cardiology',    exp:21, rating:4.9, reviews:1602, fee:1800, langs:['English','Hindi','Marathi'], modes:['clinic'], hospital:'Cardiac Sciences Institute, Mumbai',
+    quals:'MBBS, MD, DM (Cardiology), FACC', times:['10:00','10:30','11:00','11:30','12:00','12:30','16:30','17:00'],
+    bio:'Senior cardiologist with two decades of experience in angioplasty, heart failure and preventive cardiology programmes.' }
+];
+
+const AVATAR_GRADS = [
+  'linear-gradient(135deg,#2563eb,#0d9488)','linear-gradient(135deg,#7c3aed,#2563eb)',
+  'linear-gradient(135deg,#0d9488,#14b8a6)','linear-gradient(135deg,#f59e0b,#ef4444)',
+  'linear-gradient(135deg,#ec4899,#8b5cf6)','linear-gradient(135deg,#0284c7,#22d3ee)',
+  'linear-gradient(135deg,#16a34a,#0d9488)','linear-gradient(135deg,#6366f1,#a855f7)'
+];
+
+const SYMPTOM_MAP = {
+  'chest pain':'cardiology','chest':'cardiology','palpitation':'cardiology','heart':'cardiology','breathless':'cardiology','bp':'cardiology','blood pressure':'cardiology',
+  'headache':'neurology','migraine':'neurology','dizzy':'neurology','dizziness':'neurology','seizure':'neurology','numb':'neurology','tremor':'neurology','memory':'neurology',
+  'skin':'dermatology','rash':'dermatology','acne':'dermatology','pimple':'dermatology','hair':'dermatology','itch':'dermatology','eczema':'dermatology','psoriasis':'dermatology',
+  'knee':'orthopedics','joint':'orthopedics','bone':'orthopedics','back':'orthopedics','fracture':'orthopedics','shoulder':'orthopedics','sprain':'orthopedics','spine':'orthopedics',
+  'child':'pediatrics','baby':'pediatrics','infant':'pediatrics','kid':'pediatrics','vaccination':'pediatrics','toddler':'pediatrics',
+  'period':'gynecology','pregnan':'gynecology','pcos':'gynecology','menstrual':'gynecology','fertility':'gynecology','menopause':'gynecology',
+  'ear':'ent','nose':'ent','throat':'ent','sinus':'ent','hearing':'ent','tonsil':'ent','snoring':'ent','vertigo':'ent',
+  'eye':'ophthalmology','vision':'ophthalmology','blurred':'ophthalmology','cataract':'ophthalmology','glasses':'ophthalmology',
+  'anxiety':'psychiatry','stress':'psychiatry','depress':'psychiatry','sleep':'psychiatry','panic':'psychiatry','mood':'psychiatry','burnout':'psychiatry','adhd':'psychiatry',
+  'thyroid':'endocrinology','diabet':'endocrinology','sugar':'endocrinology','hormone':'endocrinology','weight gain':'endocrinology',
+  'tooth':'dentistry','teeth':'dentistry','dental':'dentistry','gum':'dentistry','cavity':'dentistry','caries':'dentistry',
+  'fever':'general','cough':'general','cold':'general','flu':'general','body ache':'general','weakness':'general','tired':'general','fatigue':'general','vomit':'general','stomach':'general','infection':'general'
+};
+
+const state = {
+  page:'home',
+  filters:{ q:'', spec:'all', mode:'all', fee:2000, sort:'rating' },
+  vitalsMetric:'heart',
+  wizard:{ step:1, doctorId:null, date:null, time:null, mode:'clinic', patient:{} },
+  bookings:[
+    { id:'MS-402118', doctorId:'d11', date:addDays(2), time:'10:00', mode:'clinic',
+      patient:{name:'Aditi Sharma', phone:'9876543210', email:'aditi@example.com', reason:'Quarterly diabetes review'},
+      status:'upcoming', fee:1300, created:'today' }
+  ],
+  prescriptions:[
+    { med:'Metformin 500mg', doc:'Dr. Deepa Menon', dose:'1-0-1 after meals', status:'Active' },
+    { med:'Atorvastatin 10mg', doc:'Dr. Ananya Rao', dose:'0-0-1 at night', status:'Active' },
+    { med:'Vitamin D3 60k IU', doc:'Dr. Rohan Gupta', dose:'Once weekly', status:'Refill due' }
+  ],
+  reports:[
+    { name:'Lipid Profile', date:'12 Aug 2026', status:'Normal', icon:'🧪' },
+    { name:'HbA1c (Diabetes)', date:'02 Aug 2026', status:'Review', icon:'🩸' },
+    { name:'ECG Report', date:'21 Jul 2026', status:'Normal', icon:'❤️' },
+    { name:'Chest X-Ray', date:'03 Jul 2026', status:'Normal', icon:'🫁' }
+  ],
+  vitals:{
+    heart:{ label:'Heart rate', unit:'bpm', color:'#ef4444', data:[72,74,70,68,73,76,71,69,72,70,75,71], avgLabel:'Resting avg' },
+    bp:   { label:'Blood pressure', unit:'mmHg', color:'#2563eb', data:[118,120,117,122,119,121,118,116,120,119,117,118], avgLabel:'Systolic avg' },
+    spo2: { label:'Blood oxygen', unit:'%', color:'#0d9488', data:[97,98,97,99,98,98,97,99,98,98,99,98], avgLabel:'SpO₂ avg' },
+    steps:{ label:'Daily steps', unit:'k steps', color:'#f59e0b', data:[6.2,7.4,5.1,8.0,6.8,7.9,9.2,5.5,7.1,8.4,6.6,7.8], avgLabel:'Daily avg' }
+  },
+  takenSlots:new Set(),
+  toggles:{ heroTab:'symptom' }
+};
+
+/* ---------------- utils ---------------- */
+function addDays(n){ const d=new Date(); d.setDate(d.getDate()+n); return iso(d); }
+function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function parseISO(s){ const p=s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+function prettyDate(s, opts){ return parseISO(s).toLocaleDateString('en-IN', opts||{ weekday:'short', day:'numeric', month:'short' }); }
+function rupee(n){ return '₹'+n.toLocaleString('en-IN'); }
+function initials(name){ return name.replace('Dr. ','').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
+function gradFor(id){ let h=0; for(const c of id) h=(h*31+c.charCodeAt(0))>>>0; return AVATAR_GRADS[h%AVATAR_GRADS.length]; }
+function specOf(id){ return SPECIALTIES.find(s=>s.id===id) || {name:'General', em:'🩺'}; }
+function docOf(id){ return DOCTORS.find(d=>d.id===id); }
+function hash(str){ let h=0; for(let i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))>>>0; return h; }
+
+function availableSlots(doc, dateISO){
+  const now = new Date();
+  const isToday = dateISO === iso(now);
+  return doc.times.filter(t=>{
+    if(state.takenSlots.has(doc.id+'|'+dateISO+'|'+t)) return false;
+    if(hash(doc.id+dateISO+t) % 5 === 0) return false;               // simulated booked slots
+    if(isToday){
+      const [hh,mm]=t.split(':').map(Number);
+      if(hh*60+mm <= now.getHours()*60 + now.getMinutes()+45) return false;
+    }
+    return true;
+  });
+}
+
+function nextAvailable(doc){
+  for(let i=0;i<14;i++){
+    const d=addDays(i);
+    const slots=availableSlots(doc,d);
+    if(slots.length) return { date:d, time:slots[0], offset:i };
+  }
+  return null;
+}
+
+/* ---------------- toasts ---------------- */
+function toast(title,msg,kind){
+  const el=document.createElement('div');
+  el.className='toast'+(kind?' '+kind:'');
+  el.innerHTML='<b>'+title+'</b><span>'+msg+'</span>';
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity .35s, transform .35s'; el.style.opacity='0'; el.style.transform='translateX(14px)';
+    setTimeout(()=>el.remove(),350); }, 4200);
+}
+
+/* ---------------- routing ---------------- */
+function showPage(page, scrollTo){
+  state.page=page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  const target=document.getElementById('page-'+page);
+  if(target) target.classList.remove('hidden');
+  document.querySelectorAll('.nav-links button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.page===page && !b.dataset.scroll);
+  });
+  document.getElementById('navLinks').classList.remove('open');
+  if(page==='doctors') renderDoctors();
+  if(page==='dashboard') renderDashboard();
+  if(page==='home') renderFeatured();
+  if(scrollTo){
+    const el=document.getElementById(scrollTo);
+    if(el){ setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),60); return; }
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------------- home renderers ---------------- */
+function renderSpecialties(){
+  const box=document.getElementById('homeSpecialties');
+  box.innerHTML=SPECIALTIES.map(s=>{
+    const count=DOCTORS.filter(d=>d.spec===s.id).length;
+    return '<button class="spec-tile" data-action="filter-spec" data-spec="'+s.id+'">'
+      +'<span class="em">'+s.em+'</span><b>'+s.name+'</b>'
+      +'<span>'+s.blurb+'</span>'
+      +'<span class="badge blue" style="margin-top:4px">'+count+' doctor'+(count===1?'':'s')+'</span></button>';
+  }).join('');
+  document.getElementById('quickSpec').innerHTML=
+    SPECIALTIES.map(s=>'<option value="'+s.id+'">'+s.name+'</option>').join('');
+  const fSpec=document.getElementById('fSpec');
+  fSpec.innerHTML='<option value="all">All specialties</option>'+
+    SPECIALTIES.map(s=>'<option value="'+s.id+'">'+s.name+'</option>').join('');
+}
+
+function doctorCard(doc, compact){
+  const na=nextAvailable(doc);
+  const naText = na ? (na.offset===0 ? 'Today · '+na.time : na.offset===1 ? 'Tomorrow · '+na.time : prettyDate(na.date,{weekday:'short',day:'numeric',month:'short'})+' · '+na.time) : 'Fully booked';
+  const spec=specOf(doc.spec);
+  return '<div class="card doc-card">'
+    +'<div class="doc-top">'
+      +'<div class="avatar" style="background:'+gradFor(doc.id)+'">'+initials(doc.name)+'</div>'
+      +'<div style="min-width:0">'
+        +'<div class="doc-name">'+doc.name+'</div>'
+        +'<div class="doc-spec">'+spec.em+' '+spec.name+'</div>'
+        +'<div class="doc-meta">'+doc.exp+' yrs exp · '+doc.hospital+'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div class="doc-body">'
+      +'<div class="doc-row"><span><span class="stars">★ '+doc.rating.toFixed(1)+'</span> <span class="muted">('+doc.reviews+' reviews)</span></span>'
+        +'<span class="badge'+(na&&na.offset===0?'':' blue')+'">'+(na&&na.offset===0?'Available today':'Next: '+naText)+'</span></div>'
+      +(compact?'':'<div class="doc-row"><span class="muted">'+doc.quals+'</span></div>')
+      +'<div class="doc-row"><span class="muted">Speaks: '+doc.langs.join(', ')+'</span></div>'
+      +'<div class="doc-row"><span class="muted">Mode: '+doc.modes.map(m=>m==='clinic'?'In-clinic':'Video').join(' · ')+'</span></div>'
+    +'</div>'
+    +'<div class="doc-foot">'
+      +'<div class="fee"><b>'+rupee(doc.fee)+'</b><br><span>per consult</span></div>'
+      +'<div style="display:flex;gap:8px">'
+        +'<button class="btn btn-ghost btn-sm" data-action="open-profile" data-doctor="'+doc.id+'">Profile</button>'
+        +'<button class="btn btn-primary btn-sm" data-action="book" data-doctor="'+doc.id+'">Book</button>'
+      +'</div>'
+    +'</div></div>';
+}
+
+function renderFeatured(){
+  const feat=['d1','d3','d10'].map(docOf);
+  document.getElementById('featuredDoctors').innerHTML=feat.map(d=>doctorCard(d,true)).join('');
+}
+
+/* ---------------- doctors page ---------------- */
+function filteredDoctors(){
+  const f=state.filters;
+  let list=DOCTORS.filter(d=>{
+    if(f.spec!=='all' && d.spec!==f.spec) return false;
+    if(f.mode!=='all' && !d.modes.includes(f.mode)) return false;
+    if(d.fee>f.fee) return false;
+    if(f.q){
+      const q=f.q.toLowerCase();
+      const hay=(d.name+' '+specOf(d.spec).name+' '+d.hospital+' '+d.quals+' '+d.langs.join(' ')).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  if(f.sort==='rating') list.sort((a,b)=>b.rating-a.rating||b.reviews-a.reviews);
+  if(f.sort==='fee') list.sort((a,b)=>a.fee-b.fee);
+  if(f.sort==='exp') list.sort((a,b)=>b.exp-a.exp);
+  if(f.sort==='soon'){
+    const rank=d=>{ const n=nextAvailable(d); return n?n.offset*10+d.times.indexOf(n.time):9999; };
+    list.sort((a,b)=>rank(a)-rank(b));
+  }
+  return list;
+}
+
+function renderDoctors(){
+  const list=filteredDoctors();
+  const grid=document.getElementById('doctorGrid');
+  document.getElementById('resultsCount').textContent=list.length+' doctor'+(list.length===1?'':'s')+' available';
+  if(!list.length){
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1">No doctors match these filters.<br><button class="btn btn-soft btn-sm" style="margin-top:14px" data-action="reset-filters">Reset filters</button></div>';
+    return;
+  }
+  grid.innerHTML=list.map(d=>doctorCard(d)).join('');
+}
+
+/* ---------------- dashboard ---------------- */
+function renderDashboard(){
+  const upcoming=state.bookings.filter(b=>b.status==='upcoming');
+  const next=upcoming.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))[0];
+
+  const stats=[
+    { ic:'📅', bg:'var(--primary-soft)', color:'var(--primary)', n:upcoming.length, t:'Upcoming appointments', s:next?('Next: '+prettyDate(next.date,{day:'numeric',month:'short'})):'Nothing scheduled' },
+    { ic:'💊', bg:'var(--accent-soft)', color:'var(--accent)', n:state.prescriptions.length, t:'Active medications', s:'2 with refills due' },
+    { ic:'📁', bg:'#fef3c7', color:'#b45309', n:state.reports.length, t:'Reports on file', s:'1 needs review' },
+    { ic:'❤️', bg:'#fee2e2', color:'#dc2626', n:state.vitals.heart.data[state.vitals.heart.data.length-1], t:'Latest heart rate', s:'bpm · within range' }
+  ];
+  document.getElementById('dashStats').innerHTML=stats.map(s=>
+    '<div class="card stat"><div class="stat-ic" style="background:'+s.bg+';color:'+s.color+'">'+s.ic+'</div>'
+    +'<div><b>'+s.n+'</b><span>'+s.t+'</span><div class="tagline">'+s.s+'</div></div></div>').join('');
+
+  document.getElementById('upcomingCount').textContent=upcoming.length+' scheduled';
+  const listEl=document.getElementById('upcomingList');
+  if(!upcoming.length){
+    listEl.innerHTML='<div class="empty">No upcoming appointments.<br><button class="btn btn-primary btn-sm" style="margin-top:14px" data-action="start-booking">Book an appointment</button></div>';
+  } else {
+    listEl.innerHTML=upcoming.slice().sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).map(b=>{
+      const doc=docOf(b.doctorId); const d=parseISO(b.date);
+      const modeLabel = b.mode==='video' ? '🎥 Video consult' : '🏥 In-clinic visit';
+      return '<div class="appt">'
+        +'<div class="appt-date"><b>'+d.getDate()+'</b><span>'+d.toLocaleDateString('en-IN',{month:'short'})+'</span></div>'
+        +'<div class="appt-info"><b>'+doc.name+'</b>'
+          +'<div>'+specOf(doc.spec).name+' · '+prettyDate(b.date)+' at '+b.time+'</div>'
+          +'<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">'
+            +'<span class="badge blue">'+modeLabel+'</span>'
+            +'<span class="badge">'+b.id+'</span>'
+          +'</div>'
+        +'</div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+          +(b.mode==='video' ? '<button class="btn btn-primary btn-sm" data-action="toast-demo" data-title="Video room" data-msg="The secure consult room opens 10 minutes before your slot.">Join call</button>' : '')
+          +'<button class="btn btn-ghost btn-sm" data-action="reschedule" data-id="'+b.id+'">Reschedule</button>'
+          +'<button class="btn btn-danger btn-sm" data-action="cancel" data-id="'+b.id+'">Cancel</button>'
+        +'</div></div>';
+    }).join('');
+  }
+
+  document.getElementById('rxBody').innerHTML=state.prescriptions.map(p=>
+    '<tr><td><b>'+p.med+'</b></td><td class="muted">'+p.doc+'</td><td class="muted">'+p.dose+'</td>'
+    +'<td><span class="pill'+(p.status==='Active'?'':' grey')+'">'+p.status+'</span></td></tr>').join('');
+
+  document.getElementById('reportsList').innerHTML=state.reports.map(r=>
+    '<div style="display:flex;align-items:center;gap:13px;padding:12px 14px;border:1px solid var(--line);border-radius:14px">'
+    +'<span style="font-size:20px">'+r.icon+'</span>'
+    +'<div style="flex:1;min-width:0"><b style="font-size:14.2px">'+r.name+'</b><div class="tagline">'+r.date+'</div></div>'
+    +'<span class="pill'+(r.status==='Normal'?'':' grey')+'">'+r.status+'</span>'
+    +'<button class="btn btn-ghost btn-sm" data-action="toast-demo" data-title="Report"'+" data-msg=\"A secure download link has been sent to your registered email.\">Open</button>"
+    +'</div>').join('');
+
+  renderVitals();
+}
+
+function renderVitals(){
+  const tabs=Object.keys(state.vitals);
+  document.getElementById('vitalTabs').innerHTML=tabs.map(k=>{
+    const v=state.vitals[k];
+    return '<button class="btn btn-ghost btn-sm" style="'+(state.vitalsMetric===k?'background:var(--primary-soft);border-color:var(--primary);color:var(--primary)':'')+'" data-action="vital-tab" data-k="'+k+'">'+v.label+'</button>';
+  }).join('');
+
+  const v=state.vitals[state.vitalsMetric];
+  const data=v.data, W=520, H=170, pad=26;
+  const min=Math.min(...data), max=Math.max(...data), span=(max-min)||1;
+  const lo=min-span*0.35, hi=max+span*0.35;
+  const x=i=>pad+(i*(W-pad*2)/(data.length-1));
+  const y=n=>H-pad-((n-lo)/(hi-lo))*(H-pad*2);
+  const pts=data.map((n,i)=>({x:x(i),y:y(n),n}));
+  const line=pts.map((p,i)=>(i?'L':'M')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' ');
+  const area=line+' L'+x(data.length-1).toFixed(1)+' '+(H-pad)+' L'+pad+' '+(H-pad)+' Z';
+  const avg=(data.reduce((a,b)=>a+b,0)/data.length);
+
+  let grid='';
+  for(let i=0;i<=3;i++){
+    const gy=pad+i*((H-pad*2)/3);
+    grid+='<line x1="'+pad+'" y1="'+gy.toFixed(1)+'" x2="'+(W-pad)+'" y2="'+gy.toFixed(1)+'" stroke="var(--line)" stroke-width="1"/>';
+  }
+  let labels='';
+  for(let i=0;i<data.length;i+=3){
+    const d=new Date(); d.setDate(d.getDate()-(data.length-1-i));
+    labels+='<text x="'+x(i).toFixed(1)+'" y="'+(H-4)+'" font-size="10.5" fill="var(--muted)" text-anchor="middle">'+d.getDate()+'/'+(d.getMonth()+1)+'</text>';
+  }
+
+  document.getElementById('vitalChart').innerHTML=
+    '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;overflow:visible">'
+    +'<defs><linearGradient id="vg" x1="0" y1="0" x2="0" y2="1">'
+      +'<stop offset="0%" stop-color="'+v.color+'" stop-opacity=".28"/><stop offset="100%" stop-color="'+v.color+'" stop-opacity="0"/>'
+    +'</linearGradient></defs>'
+    +grid
+    +'<path d="'+area+'" fill="url(#vg)"/>'
+    +'<path d="'+line+'" fill="none" stroke="'+v.color+'" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'
+    +pts.map((p,i)=>'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+(i===pts.length-1?4.6:2.8)+'" fill="'+(i===pts.length-1?v.color:'var(--surface)')+'" stroke="'+v.color+'" stroke-width="2"><title>'+p.n+' '+v.unit+'</title></circle>').join('')
+    +labels
+    +'</svg>';
+
+  const last=data[data.length-1];
+  const prev=data[data.length-2];
+  const diff=(last-prev).toFixed(1);
+  document.getElementById('vitalSummary').innerHTML=
+    '<div class="vital-stat"><span>Latest</span><b>'+last+' '+v.unit+'</b></div>'
+    +'<div class="vital-stat"><span>'+v.avgLabel+'</span><b>'+avg.toFixed(1)+' '+v.unit+'</b></div>'
+    +'<div class="vital-stat"><span>Change</span><b style="color:'+(diff>=0?'var(--warn)':'var(--ok)')+'">'+(diff>=0?'+':'')+diff+'</b></div>';
+}
+
+/* ---------------- modal plumbing ---------------- */
+function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
+function openModal(html){
+  document.getElementById('modalRoot').innerHTML=
+    '<div class="backdrop" data-action="backdrop"><div class="modal" onclick="event.stopPropagation()">'
+    +'<button class="modal-x" data-action="close-modal" aria-label="Close">✕</button>'
+    +'<div class="modal-pad">'+html+'</div></div></div>';
+}
+
+function openProfile(id){
+  const d=docOf(id), s=specOf(d.spec), na=nextAvailable(d);
+  const slots=na?availableSlots(d,na.date).slice(0,6):[];
+  openModal(
+    '<div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;padding-right:30px">'
+      +'<div class="avatar" style="width:72px;height:72px;font-size:23px;background:'+gradFor(d.id)+'">'+initials(d.name)+'</div>'
+      +'<div><h3 class="modal-title">'+d.name+'</h3>'
+      +'<div class="doc-spec">'+s.em+' '+s.name+'</div>'
+      +'<div class="muted" style="font-size:13.4px;margin-top:4px">'+d.quals+'</div>'
+      +'<div style="margin-top:9px;display:flex;gap:8px;flex-wrap:wrap">'
+        +'<span class="badge blue">★ '+d.rating.toFixed(1)+' ('+d.reviews+')</span>'
+        +'<span class="badge">'+d.exp+' yrs experience</span>'
+        +'<span class="badge">'+rupee(d.fee)+' / consult</span>'
+      +'</div></div>'
+    +'</div>'
+    +'<p style="font-size:14.6px;color:var(--muted);margin-bottom:20px">'+d.bio+'</p>'
+    +'<div class="summary" style="margin-bottom:20px">'
+      +'<div class="summary-row"><span>Hospital / Clinic</span><b>'+d.hospital+'</b></div>'
+      +'<div class="summary-row"><span>Languages</span><b>'+d.langs.join(', ')+'</b></div>'
+      +'<div class="summary-row"><span>Consultation modes</span><b>'+d.modes.map(m=>m==='clinic'?'In-clinic':'Video').join(' · ')+'</b></div>'
+      +'<div class="summary-row"><span>Next available</span><b>'+(na?prettyDate(na.date)+' · '+na.time:'Fully booked')+'</b></div>'
+    +'</div>'
+    +(slots.length?'<h4 style="font-size:14px;margin-bottom:10px">Upcoming slots · '+prettyDate(na.date)+'</h4><div class="slot-grid" style="margin-bottom:22px">'
+      +slots.map(t=>'<button class="btn btn-ghost btn-sm" data-action="book-slot" data-doctor="'+d.id+'" data-date="'+na.date+'" data-time="'+t+'">'+t+'</button>').join('')
+      +'</div>':'')
+    +'<button class="btn btn-primary btn-block" data-action="book" data-doctor="'+d.id+'">Book appointment with '+d.name+'</button>'
+  );
+}
+
+/* ---------------- booking wizard ---------------- */
+function startBooking(doctorId){
+  state.wizard={ step: doctorId?2:1, doctorId:doctorId||null, date:null, time:null, mode:'clinic', patient:{} };
+  renderWizard();
+}
+
+function wizardLabel(){
+  return ['Choose doctor','Date & time','Your details','Review'][state.wizard.step-1];
+}
+
+function renderWizard(){
+  const w=state.wizard;
+  let body='';
+
+  if(w.step===1){
+    const groups=SPECIALTIES.filter(s=>DOCTORS.some(d=>d.spec===s.id));
+    body+='<div class="field" style="margin-bottom:16px"><label>Filter by department</label>'
+      +'<select class="input" id="wizSpec">'+groups.map(s=>'<option value="'+s.id+'">'+s.em+' '+s.name+'</option>').join('')+'</select></div>'
+      +'<div id="wizDocList" style="display:flex;flex-direction:column;gap:10px;max-height:340px;overflow:auto;padding-right:4px"></div>';
+  }
+
+  if(w.step===2){
+    if(!w.doctorId){ body+='<div class="empty">Please choose a doctor first.</div>'; }
+    else {
+      const d=docOf(w.doctorId);
+      body+='<div style="display:flex;align-items:center;gap:13px;padding:14px;border:1px solid var(--line);border-radius:15px;margin-bottom:20px">'
+        +'<div class="avatar" style="width:48px;height:48px;font-size:16px;border-radius:14px;background:'+gradFor(d.id)+'">'+initials(d.name)+'</div>'
+        +'<div style="flex:1"><b style="font-size:15px">'+d.name+'</b><div class="tagline">'+specOf(d.spec).name+' · '+rupee(d.fee)+'</div></div>'
+        +'<button class="btn btn-ghost btn-sm" data-action="wiz-change-doctor">Change</button></div>'
+        +'<div class="field" style="margin-bottom:16px"><label>Select a date</label><div class="date-strip" id="wizDates">'
+        +Array.from({length:14},(_,i)=>{
+          const dISO=addDays(i); const dd=parseISO(dISO);
+          const count=availableSlots(d,dISO).length;
+          return '<button class="date-pill'+(w.date===dISO?' on':'')+'" data-action="wiz-date" data-date="'+dISO+'"'+(count?'':' disabled style="opacity:.4"')+'>'
+            +'<b>'+dd.getDate()+'</b><span>'+(i===0?'Today':i===1?'Tmrw':dd.toLocaleDateString('en-IN',{weekday:'short'}))+'</span>'
+            +'<div style="font-size:10.4px;margin-top:4px;opacity:.85">'+count+' slot'+(count===1?'':'s')+'</div></button>';
+        }).join('')+'</div></div>'
+        +'<div class="field" style="margin-bottom:16px"><label>Consultation mode</label><div class="seg">'
+          +'<button class="'+(w.mode==='clinic'?'on':'')+'" data-action="wiz-mode" data-mode="clinic"'+(d.modes.includes('clinic')?'':' disabled style="opacity:.4"')+'>🏥 In-clinic</button>'
+          +'<button class="'+(w.mode==='video'?'on':'')+'" data-action="wiz-mode" data-mode="video"'+(d.modes.includes('video')?'':' disabled style="opacity:.4"')+'>🎥 Video consult</button>'
+        +'</div></div>'
+        +'<div class="field"><label>Available time slots'+(w.date?' · '+prettyDate(w.date)+'':' · pick a date first')+'</label>'
+        +(w.date
+          ? (availableSlots(d,w.date).length
+              ? '<div class="slot-grid">'+availableSlots(d,w.date).map(t=>'<button class="slot'+(w.time===t?' on':'')+'" data-action="wiz-time" data-time="'+t+'">'+t+'</button>').join('')+'</div>'
+              : '<div class="empty">No slots left on this date — try another day.</div>')
+          : '<div class="empty">Select a date to see open slots.</div>')
+        +'</div>';
+    }
+  }
+
+  if(w.step===3){
+    const p=w.patient||{};
+    body+='<div class="form-grid">'
+      +'<div class="field full"><label for="pName">Patient full name *</label><input id="pName" class="input" value="'+(p.name||'')+'" placeholder="e.g. Aditi Sharma"><div class="err hidden" id="eName"></div></div>'
+      +'<div class="field"><label for="pPhone">Mobile number *</label><input id="pPhone" class="input" value="'+(p.phone||'')+'" placeholder="10-digit number"><div class="err hidden" id="ePhone"></div></div>'
+      +'<div class="field"><label for="pEmail">Email *</label><input id="pEmail" class="input" value="'+(p.email||'')+'" placeholder="you@example.com"><div class="err hidden" id="eEmail"></div></div>'
+      +'<div class="field"><label for="pAge">Age</label><input id="pAge" class="input" value="'+(p.age||'')+'" placeholder="e.g. 32"></div>'
+      +'<div class="field"><label for="pGender">Gender</label><select id="pGender" class="input"><option>Prefer not to say</option><option'+(p.gender==='Female'?' selected':'')+'>Female</option><option'+(p.gender==='Male'?' selected':'')+'>Male</option><option'+(p.gender==='Other'?' selected':'')+'>Other</option></select></div>'
+      +'<div class="field full"><label for="pReason">Reason for visit</label><textarea id="pReason" class="input" placeholder="Briefly describe your symptoms or purpose of consultation">'+(p.reason||'')+'</textarea></div>'
+    +'</div>'
+    +'<div class="summary" style="margin-top:18px;font-size:13.4px;color:var(--muted)">'
+      +'🔒 Your details are encrypted and shared only with the consulting doctor. Free cancellation up to 4 hours before the slot.'
+    +'</div>';
+  }
+
+  if(w.step===4){
+    const d=w.doctorId?docOf(w.doctorId):null, p=w.patient||{};
+    if(!d){ body+='<div class="empty">Missing doctor selection.</div>'; }
+    else if(!w.date||!w.time){ body+='<div class="empty">Missing date or time slot selection.</div>'; }
+    else {
+      body+='<div class="summary">'
+        +'<div class="summary-row"><span>Doctor</span><b>'+d.name+' · '+specOf(d.spec).name+'</b></div>'
+        +'<div class="summary-row"><span>Date &amp; time</span><b>'+prettyDate(w.date,{weekday:'long',day:'numeric',month:'long'})+' at '+w.time+'</b></div>'
+        +'<div class="summary-row"><span>Consultation mode</span><b>'+(w.mode==='video'?'Video consult':'In-clinic visit')+'</b></div>'
+        +'<div class="summary-row"><span>Location</span><b>'+(w.mode==='video'?'Secure MediSync video room':d.hospital)+'</b></div>'
+        +'<div class="summary-row"><span>Patient</span><b>'+(p.name||'—')+'</b></div>'
+        +'<div class="summary-row"><span>Contact</span><b>'+(p.phone||'—')+(p.email?' · '+p.email:'')+'</b></div>'
+        +(p.reason?'<div class="summary-row"><span>Reason</span><b>'+p.reason+'</b></div>':'')
+        +'<div class="summary-row"><span>Consultation fee</span><b>'+rupee(d.fee)+'</b></div>'
+        +'<div class="summary-row"><span>Platform fee</span><b>'+rupee(49)+'</b></div>'
+        +'<div class="summary-row" style="font-size:16px;padding-top:14px"><span style="color:var(--ink);font-weight:600">Total payable</span><b style="color:var(--primary);font-size:19px">'+rupee(d.fee+49)+'</b></div>'
+      +'</div>'
+      +'<div class="summary" style="margin-top:16px;font-size:13.4px;color:var(--muted)">Pay at the clinic or via the secure payment link sent with your confirmation. Free cancellation up to 4 hours before the appointment.</div>';
+    }
+  }
+
+  const canNext = w.step===1 ? !!w.doctorId : w.step===2 ? (!!w.date && !!w.time) : true;
+
+  openModal(
+    '<h3 class="modal-title">'+(w.step===4?'Confirm your appointment':'Book an appointment')+'</h3>'
+    +'<p class="modal-sub">Step '+w.step+' of 4 · '+wizardLabel()+'</p>'
+    +'<div class="wiz-steps">'+[1,2,3,4].map(i=>'<div class="ws'+(i<=w.step?' on':'')+'"></div>').join('')+'</div>'
+    +'<div class="wiz-labels">'+['Doctor','Slot','Details','Confirm'].map((l,i)=>'<span class="'+(i+1<=w.step?'on':'')+'">'+l+'</span>').join('')+'</div>'
+    +'<div id="wizBody">'+body+'</div>'
+    +'<div style="display:flex;gap:10px;margin-top:26px;padding-top:20px;border-top:1px solid var(--line)">'
+      +(w.step>1?'<button class="btn btn-ghost" data-action="wiz-back">Back</button>':'<button class="btn btn-ghost" data-action="close-modal">Cancel</button>')
+      +'<div style="flex:1"></div>'
+      +(w.step<4
+        ? '<button class="btn btn-primary" data-action="wiz-next" '+(canNext?'':'disabled')+'>Continue</button>'
+        : '<button class="btn btn-primary" data-action="wiz-confirm">Confirm booking</button>')
+    +'</div>'
+  );
+
+  if(w.step===1) renderWizDocs();
+}
+
+function renderWizDocs(){
+  const sel=document.getElementById('wizSpec');
+  if(!sel) return;
+  const specId=sel.value || SPECIALTIES.find(s=>DOCTORS.some(d=>d.spec===s.id)).id;
+  const list=DOCTORS.filter(d=>d.spec===specId);
+  document.getElementById('wizDocList').innerHTML=list.map(d=>{
+    const na=nextAvailable(d);
+    const on=state.wizard.doctorId===d.id;
+    return '<button style="text-align:left;display:flex;gap:13px;align-items:center;padding:14px;border-radius:15px;cursor:pointer;'
+      +'border:1px solid '+(on?'var(--primary)':'var(--line)')+';background:'+(on?'var(--primary-soft)':'var(--surface)')+'" '
+      +'data-action="wiz-pick-doctor" data-doctor="'+d.id+'">'
+      +'<div class="avatar" style="width:44px;height:44px;font-size:15px;border-radius:13px;background:'+gradFor(d.id)+'">'+initials(d.name)+'</div>'
+      +'<div style="flex:1;min-width:0"><b style="font-size:14.6px">'+d.name+'</b>'
+      +'<div class="tagline">'+d.exp+' yrs · ★ '+d.rating.toFixed(1)+' · '+rupee(d.fee)+'</div>'
+      +'<div class="tagline">'+(na?'Next: '+prettyDate(na.date,{day:'numeric',month:'short'})+' · '+na.time:'Fully booked')+'</div></div>'
+      +(on?'<span class="badge">Selected</span>':'<span class="btn btn-soft btn-sm">Select</span>')
+      +'</button>';
+  }).join('');
+}
+
+function validatePatient(){
+  let ok=true;
+  const name=document.getElementById('pName'), phone=document.getElementById('pPhone'), email=document.getElementById('pEmail');
+  const show=(el,id,msg)=>{ const e=document.getElementById(id); e.textContent=msg; e.classList.remove('hidden'); ok=false; };
+  ['eName','ePhone','eEmail'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+
+  if(!name.value.trim() || name.value.trim().length<3) show(name,'eName','Please enter the patient\u2019s full name.');
+  if(!/^[0-9]{10}$/.test(phone.value.replace(/\D/g,''))) show(phone,'ePhone','Enter a valid 10-digit mobile number.');
+  if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email.value.trim())) show(email,'eEmail','Enter a valid email address.');
+
+  if(ok){
+    state.wizard.patient={
+      name:name.value.trim(), phone:phone.value.replace(/\D/g,''), email:email.value.trim(),
+      age:document.getElementById('pAge').value.trim(),
+      gender:document.getElementById('pGender').value,
+      reason:document.getElementById('pReason').value.trim()
+    };
+  }
+  return ok;
+}
+
+function confirmBooking(){
+  const w=state.wizard, d=docOf(w.doctorId);
+  const id='MS-'+(100000+Math.floor(Math.random()*899999));
+  const booking={ id, doctorId:w.doctorId, date:w.date, time:w.time, mode:w.mode,
+    patient:w.patient, status:'upcoming', fee:d.fee };
+  state.bookings.push(booking);
+  state.takenSlots.add(w.doctorId+'|'+w.date+'|'+w.time);
+
+  openModal(
+    '<div class="success">'
+      +'<div class="tick">✓</div>'
+      +'<h3 class="modal-title" style="padding:0">Appointment confirmed</h3>'
+      +'<p class="muted" style="font-size:14.6px;margin-top:8px">A confirmation has been sent to '+w.patient.email+' and over SMS.</p>'
+      +'<div class="book-id">'+id+'</div>'
+      +'<div class="summary" style="text-align:left;margin-top:20px">'
+        +'<div class="summary-row"><span>Doctor</span><b>'+d.name+'</b></div>'
+        +'<div class="summary-row"><span>Department</span><b>'+specOf(d.spec).name+'</b></div>'
+        +'<div class="summary-row"><span>When</span><b>'+prettyDate(w.date,{weekday:'long',day:'numeric',month:'long'})+' · '+w.time+'</b></div>'
+        +'<div class="summary-row"><span>Mode</span><b>'+(w.mode==='video'?'Video consult':'In-clinic visit')+'</b></div>'
+        +'<div class="summary-row"><span>Patient</span><b>'+w.patient.name+'</b></div>'
+        +'<div class="summary-row"><span>Amount due</span><b>'+rupee(d.fee+49)+'</b></div>'
+      +'</div>'
+      +'<div style="display:flex;gap:10px;margin-top:22px">'
+        +'<button class="btn btn-ghost" style="flex:1" data-action="close-modal">Done</button>'
+        +'<button class="btn btn-primary" style="flex:1" data-action="go-dashboard">View in my health</button>'
+      +'</div>'
+      +'<p class="muted" style="font-size:12.6px;margin-top:16px">Free cancellation up to 4 hours before your slot.</p>'
+    +'</div>'
+  );
+  toast('Appointment confirmed','Booking '+id+' with '+d.name+'.','ok');
+}
+
+/* ---------------- symptom checker ---------------- */
+function runSymptom(){
+  const raw=(document.getElementById('symptomInput').value||'').toLowerCase().trim();
+  const out=document.getElementById('symptomResult');
+  if(!raw){
+    out.classList.remove('hidden');
+    out.innerHTML='<div class="empty">Type a symptom or tap a quick chip above.</div>';
+    return;
+  }
+  let matched=null;
+  for(const key in SYMPTOM_MAP){ if(raw.includes(key)){ matched=SYMPTOM_MAP[key]; break; } }
+  if(!matched) matched='general';
+  const spec=specOf(matched);
+  const docs=DOCTORS.filter(d=>d.spec===matched).sort((a,b)=>b.rating-a.rating).slice(0,2);
+  const d=docs[0], na=d?nextAvailable(d):null;
+
+  out.classList.remove('hidden');
+  out.innerHTML='<div style="padding:16px;border-radius:15px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 35%, transparent)">'
+    +'<div style="font-size:12.4px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)">Suggested department</div>'
+    +'<div style="font-size:19px;font-weight:800;margin:6px 0 4px">'+spec.em+' '+spec.name+'</div>'
+    +'<p class="muted" style="font-size:13.4px">Based on "'+raw.slice(0,48)+(raw.length>48?'…':'')+'" we suggest starting with '+spec.name.toLowerCase()+'.</p>'
+    +(d?'<div style="margin-top:14px;font-size:13.6px"><b>'+d.name+'</b> · ★ '+d.rating.toFixed(1)+' · '+rupee(d.fee)+'<br><span class="muted">'+(na?'Next slot '+prettyDate(na.date,{day:'numeric',month:'short'})+' at '+na.time:'Currently fully booked')+'</span></div>':'')
+    +'<div style="display:flex;gap:8px;margin-top:14px">'
+      +'<button class="btn btn-primary btn-sm" data-action="filter-spec" data-spec="'+matched+'">See all '+spec.name+' doctors</button>'
+      +(d?'<button class="btn btn-ghost btn-sm" data-action="book" data-doctor="'+d.id+'">Book '+d.name.split(' ').slice(1).join(' ')+'</button>':'')
+    +'</div></div>'
+    +'<p class="muted" style="font-size:11.8px;margin-top:10px">Symptom suggestions are informational and not a medical diagnosis.</p>';
+}
+
+/* ---------------- event delegation ---------------- */
+document.addEventListener('click', e=>{
+  const btn=e.target.closest('[data-action]');
+  if(!btn) return;
+  const a=btn.dataset.action;
+
+  switch(a){
+    case 'nav':
+      showPage(btn.dataset.page, btn.dataset.scroll);
+      break;
+    case 'menu':
+      document.getElementById('navLinks').classList.toggle('open');
+      break;
+    case 'toggle-theme': {
+      const root=document.documentElement;
+      const dark=root.getAttribute('data-theme')==='dark';
+      root.setAttribute('data-theme', dark?'light':'dark');
+      document.getElementById('themeIcon').innerHTML = dark
+        ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'
+        : '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+      break;
+    }
+    case 'start-booking': startBooking(null); break;
+    case 'book': startBooking(btn.dataset.doctor); break;
+    case 'open-profile': openProfile(btn.dataset.doctor); break;
+    case 'book-slot': startBooking(btn.dataset.doctor); state.wizard.date=btn.dataset.date; state.wizard.time=btn.dataset.time; state.wizard.step=3; renderWizard(); break;
+    case 'close-modal': closeModal(); break;
+    case 'backdrop': closeModal(); break;
+    case 'go-dashboard': closeModal(); showPage('dashboard'); toast('Welcome back','Your appointment is booked in your health record.','ok'); break;
+
+    case 'filter-spec':
+      state.filters.spec=btn.dataset.spec;
+      document.getElementById('fSpec').value=btn.dataset.spec;
+      renderDoctors();
+      showPage('doctors');
+      break;
+    case 'reset-filters':
+      state.filters={ q:'', spec:'all', mode:'all', fee:2000, sort:'rating' };
+      document.getElementById('fSearch').value='';
+      document.getElementById('fSpec').value='all';
+      document.getElementById('fFee').value=2000;
+      document.getElementById('feeOut').textContent='₹2000';
+      document.getElementById('fSort').value='rating';
+      document.querySelector('input[name=mode][value=all]').checked=true;
+      renderDoctors();
+      toast('Filters reset','Showing all 14 verified doctors.');
+      break;
+
+    case 'hero-tab': {
+      const tab=btn.dataset.tab;
+      document.querySelectorAll('[data-action=hero-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+      document.getElementById('heroTabSymptom').classList.toggle('hidden',tab!=='symptom');
+      document.getElementById('heroTabQuick').classList.toggle('hidden',tab!=='quick');
+      break;
+    }
+    case 'symptom-preset':
+      document.getElementById('symptomInput').value=btn.dataset.s;
+      runSymptom();
+      break;
+    case 'run-symptom': runSymptom(); break;
+    case 'quick-book': {
+      const spec=document.getElementById('quickSpec').value;
+      state.filters.spec=spec;
+      document.getElementById('fSpec').value=spec;
+      showPage('doctors');
+      toast('Filtered by '+specOf(spec).name,'Showing matching doctors and their next available slots.');
+      break;
+    }
+    case 'vital-tab':
+      state.vitalsMetric=btn.dataset.k;
+      renderVitals();
+      break;
+
+    case 'wiz-pick-doctor':
+      state.wizard.doctorId=btn.dataset.doctor;
+      state.wizard.date=null; state.wizard.time=null;
+      renderWizard();
+      break;
+    case 'wiz-change-doctor':
+      state.wizard.step=1; renderWizard(); break;
+    case 'wiz-date':
+      state.wizard.date=btn.dataset.date; state.wizard.time=null; renderWizard(); break;
+    case 'wiz-time':
+      state.wizard.time=btn.dataset.time; renderWizard(); break;
+    case 'wiz-mode':
+      if(btn.disabled) break;
+      state.wizard.mode=btn.dataset.mode; renderWizard(); break;
+    case 'wiz-back':
+      state.wizard.step=Math.max(1,state.wizard.step-1); renderWizard(); break;
+    case 'wiz-next':
+      if(state.wizard.step===3 && !validatePatient()){ toast('Check your details','Please fix the highlighted fields.','warn'); return; }
+      state.wizard.step=Math.min(4,state.wizard.step+1); renderWizard(); break;
+    case 'wiz-confirm':
+      confirmBooking(); break;
+
+    case 'cancel': {
+      const b=state.bookings.find(x=>x.id===btn.dataset.id);
+      if(b){
+        b.status='cancelled';
+        if(b.doctorId&&b.date&&b.time) state.takenSlots.delete(b.doctorId+'|'+b.date+'|'+b.time);
+        renderDashboard();
+        toast('Appointment cancelled','Booking '+b.id+' has been cancelled. No charges apply.','warn');
+      }
+      break;
+    }
+    case 'reschedule': {
+      const b=state.bookings.find(x=>x.id===btn.dataset.id);
+      if(b){
+        state.takenSlots.delete(b.doctorId+'|'+b.date+'|'+b.time);
+        state.bookings=state.bookings.filter(x=>x.id!==b.id);
+        startBooking(b.doctorId);
+        toast('Rescheduling '+b.id,'Pick a new date and time for '+docOf(b.doctorId).name+'.');
+      }
+      break;
+    }
+    case 'toast-demo':
+      toast(btn.dataset.title||'MediSync', btn.dataset.msg||'Feature coming soon.','warn');
+      break;
+  }
+});
+
+document.addEventListener('change', e=>{
+  const t=e.target;
+  if(t.id==='wizSpec') renderWizDocs();
+});
+
+document.addEventListener('input', e=>{
+  const t=e.target;
+  if(t.id==='fSearch'){ state.filters.q=t.value; renderDoctors(); }
+  if(t.id==='fFee'){ state.filters.fee=+t.value; document.getElementById('feeOut').textContent=rupee(+t.value); renderDoctors(); }
+  if(t.id==='fSpec'){ state.filters.spec=t.value; renderDoctors(); }
+  if(t.id==='fSort'){ state.filters.sort=t.value; renderDoctors(); }
+  if(t.name==='mode'){ state.filters.mode=t.value; renderDoctors(); }
+  if(t.id==='symptomInput' && t.value.trim().length>6) runSymptom();
+});
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && document.querySelector('.backdrop')) closeModal();
+});
+
+/* ---------------- boot ---------------- */
+renderSpecialties();
+renderFeatured();
+document.getElementById('themeIcon').innerHTML='<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+document.getElementById('navLinks').querySelector('button').classList.add('active');
+setTimeout(()=>toast('Welcome to MediSync','Book a consultation in under two minutes — free for patients.'),900);
+</script>
+</body>
+</html>
